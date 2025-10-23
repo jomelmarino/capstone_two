@@ -1,12 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { getStudents, Student } from '../../../lib/students';
 
-export default function STEM() {
+export default function SubjectScreen() {
   const router = useRouter();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // --- START: ESSENTIAL CODE (NO CHANGES) ---
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
@@ -14,61 +18,137 @@ export default function STEM() {
     }
   }, [router]);
 
-  const handleBack = () => {
-    router.push('/dashboard');
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      const approvedStudents = await getStudents();
+      setStudents(approvedStudents);
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      alert('Error: Failed to load students');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const students = [
-    { name: 'Student 1', fourPS: 'fourPS' },
-    { name: 'Student 2', fourPS: 'fourPS' },
-    { name: 'John Doe', fourPS: 'fourPS' },
-    { name: 'Jane Smith', fourPS: 'fourPS' },
-  ];
+  const groupedStudents = students
+    .sort((a, b) => a.lname.localeCompare(b.lname))
+    .reduce((acc, student) => {
+      const strand = student.strand || 'Unknown';
+      if (!acc[strand]) acc[strand] = [];
+      acc[strand].push(student);
+      return acc;
+    }, {} as Record<string, Student[]>);
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter students based on search query
+  const filteredStudents = groupedStudents['STEM']
+    ? groupedStudents['STEM'].filter(student =>
+        `${student.lname}, ${student.fname} ${student.mname}`
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase())
+      )
+    : [];
+  // --- END: ESSENTIAL CODE (NO CHANGES) ---
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <h1 className="text-3xl font-bold text-gray-900">STEM Students</h1>
-            <button
-              onClick={handleBack}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Back to Dashboard
-            </button>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header - STEM Themed Gradient and Elevated */}
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-700 pt-12 pb-8 px-6 shadow-xl rounded-b-3xl">
+        <div className="flex items-start mb-6">
+          {/* Back Button (using simple arrow HTML entity) */}
+          <button
+            onClick={() => router.back()}
+            className="p-2 rounded-full hover:bg-white/20 transition duration-150 mr-4 self-center"
+            aria-label="Go back"
+          >
+            <span className="text-white text-3xl font-bold">←</span>
+          </button>
+          <div className="flex flex-col">
+            <h1 className="text-white text-3xl font-extrabold tracking-tight">
+              STEM Students
+            </h1>
+            <p className="text-indigo-200 text-sm font-medium mt-1">
+              Science, Technology, Engineering and Mathematics Strand
+            </p>
           </div>
         </div>
-      </header>
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="mb-4">
-            <input
-              type="text"
-              placeholder="Search students..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-          <div className="bg-white shadow overflow-hidden sm:rounded-md">
-            <ul className="divide-y divide-gray-200">
-              {filteredStudents.map((student, index) => (
-                <li key={index} className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-gray-900">{student.name}</div>
-                    <div className="text-sm text-gray-500">{student.fourPS}</div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
+
+        {/* Search Bar - White, Shadowed, and Iconized (No Package) */}
+        <div className="relative bg-white rounded-xl shadow-lg focus-within:ring-4 focus-within:ring-purple-300 transition duration-200">
+          {/* Search Icon (using simple text/placeholder) */}
+          <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl font-bold">
+            🔍
+          </span>
+          <input
+            placeholder="Search students (Last Name, First Name...)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="text-gray-800 w-full py-3 pl-10 pr-4 rounded-xl focus:outline-none"
+          />
         </div>
-      </main>
+      </div>
+
+      {/* Content Area - Clean Background */}
+      <div className="flex-1 px-4 py-6 overflow-y-auto">
+
+        {/* Approved Students Card - Structured and Highlighting Strand */}
+        <div className="bg-white rounded-xl p-5 shadow-lg border border-gray-200">
+          <h2 className="text-2xl font-bold text-purple-700 mb-4 border-b pb-2 border-gray-200">
+            Approved Students List
+          </h2>
+
+          {loading ? (
+            <div className="flex justify-center items-center py-8">
+              {/* Simple Loading Spinner (using Tailwind classes) */}
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mr-3"></div>
+              <p className="text-gray-600 font-medium">Loading student data...</p>
+            </div>
+          ) : groupedStudents['STEM'] && groupedStudents['STEM'].length > 0 ? (
+            <div>
+              <p className="text-md font-semibold text-gray-700 mb-4">
+                Strand: <span className="text-purple-600 font-extrabold">STEM ({filteredStudents.length} Students)</span>
+              </p>
+              
+              {filteredStudents.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredStudents.map((student, index) => (
+                    <div
+                      key={student.lrn}
+                      className="flex items-center p-3 bg-indigo-50 hover:bg-indigo-100 transition duration-150 rounded-lg border border-indigo-200 shadow-sm"
+                    >
+                      <span className="text-indigo-500 text-base font-bold mr-4 w-6 text-center">
+                        {index + 1}.
+                      </span>
+                      <div className="flex-1">
+                        <p className="text-gray-800 font-medium">
+                          {student.lname}, {student.fname} {student.mname}
+                        </p>
+                        <p className={`text-xs font-semibold ${student.fourPS === 'Yes' ? 'text-green-600' : 'text-red-500'}`}>
+                          4Ps Status: {student.fourPS || 'No'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-4 text-gray-500 italic">
+                  No students matched your search query in STEM.
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <p className="text-gray-600 font-medium">
+                😔 No approved STEM students yet.
+              </p>
+            </div>
+          )}
+        </div>
+        <div className="h-10" /> {/* Extra space at the bottom */}
+      </div>
     </div>
   );
 }

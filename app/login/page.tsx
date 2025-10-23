@@ -47,7 +47,7 @@ export default function Login() {
 
   return (
     // ✨ **Design Changes: Darker Background & Centering**
-    <div className="flex min-h-screen items-center justify-center bg-gray-900 px-4 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#107DAC' }}>
       <div className="w-full max-w-md space-y-8 p-10 bg-white rounded-xl shadow-2xl"> {/* Added padding, white background, larger shadow, rounded corners */}
         
         {/* ## Header */}
