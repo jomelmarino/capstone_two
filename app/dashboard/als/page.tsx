@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { getALSStudents, Student } from '../../../lib/students';
+import { supabase } from '../../../lib/supabase';
 
 export default function SubjectScreen() {
   const router = useRouter();
@@ -13,10 +14,13 @@ export default function SubjectScreen() {
 
   // --- START: ESSENTIAL CODE (NO CHANGES) ---
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
-    if (!isLoggedIn) {
-      router.push('/login');
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/login');
+      }
+    };
+    checkAuth();
   }, [router]);
 
   useEffect(() => {
