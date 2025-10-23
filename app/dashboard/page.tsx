@@ -22,7 +22,9 @@ export default function Dashboard() {
   }, [router]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    const { data: { session } } = await supabase.auth.getSession();
+    const isExpired = session && session.expires_at && session.expires_at < Date.now() / 1000;
+    await supabase.auth.signOut({ scope: isExpired ? 'local' : 'global' });
     router.push('/login');
   };
 
