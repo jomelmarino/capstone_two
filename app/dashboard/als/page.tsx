@@ -18,14 +18,23 @@ export default function SubjectScreen() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push('/login');
+      } else {
+        // Only fetch students after confirming authentication
+        fetchStudents();
+        // Set up real-time subscription for automatic updates
+        const channel = supabase
+          .channel('als-updates')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'ALS' }, () => {
+            fetchStudents();
+          })
+          .subscribe();
+        return () => {
+          supabase.removeChannel(channel);
+        };
       }
     };
     checkAuth();
   }, [router]);
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
 
   useEffect(() => {
     return () => {

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { supabase } from '../../lib/supabase';
 
 export default function Dashboard() {
@@ -28,16 +29,16 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#107DAC' }}>
       <header className="bg-white shadow-lg"> {/* Mas malaking shadow */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 " style={{ backgroundColor: '#0B3C5D' }}>
+        <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 " style={{ backgroundColor: '#0B3C5D' }}>
           <div className="flex justify-between items-center py-6">
             <div>
-              <h1 className="text-4xl font-extrabold text-white">Dashboard 🧭</h1> {/* Mas malaking heading */}
+              <h1 className="text-4xl font-extrabold text-white flex items-center">Dashboard <Image src="/Logo.png" alt="Logo" width={48} height={48} className="ml-2" /></h1> {/* Mas malaking heading */}
               {userEmail && <p className="text-md text-white font-semibold mt-1">Hello, {userEmail}</p>} {/* Binago ang text color/style */}
             </div>
             <button
               onClick={handleLogout}
               // Binago ang style ng Logout button
-              className="bg-white border border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold py-2 px-4 rounded-full transition duration-150 ease-in-out shadow-md"
+              className="bg-white border border-red-500 text-red-600 hover:bg-red-50 hover:text-red-700 font-semibold py-2 px-4 rounded-full transition duration-150 ease-in-out shadow-md mt-10"
             >
               Logout
             </button>
