@@ -38,7 +38,8 @@ export default function SubjectScreen() {
   };
 
   const groupedStudents = students
-    .sort((a, b) => a.lname.localeCompare(b.lname))
+    .filter(student => student.lname && student.fname && student.mname)
+    .sort((a, b) => (a.lname || '').localeCompare(b.lname || ''))
     .reduce((acc, student) => {
       const strand = student.strand || 'Unknown';
       if (!acc[strand]) acc[strand] = [];

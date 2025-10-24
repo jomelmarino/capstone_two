@@ -63,7 +63,8 @@ export default function SubjectScreen() {
 
   // Filter students based on search query
   const filteredStudents = students
-    .sort((a, b) => a.lname.localeCompare(b.lname))
+    .filter(student => student.lname && student.fname && student.mname)
+    .sort((a, b) => (a.lname || '').localeCompare(b.lname || ''))
     .filter(student =>
       `${student.lname}, ${student.fname} ${student.mname}`
         .toLowerCase()
