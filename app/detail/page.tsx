@@ -26,7 +26,7 @@ export default function Detail() {
             <li>The app will be added to your home screen.</li>
             <li>Open it from your home screen and start using it!</li>
           </ol>
-          <Image className="mx-auto mt-6" src="/Logo.png" alt="Example of the app interface" width={250} height={150} />
+          <Image className="mx-auto mt-6" src="/Steps.jpg" alt="Example of the app interface" width={250} height={150} />
         </div>
 
         <div className="text-center space-y-4">
