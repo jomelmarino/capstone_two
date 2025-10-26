@@ -15,10 +15,10 @@ export default function SubjectScreen() {
   // --- START: ESSENTIAL CODE (NO CHANGES) ---
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
-      } else {
+      // Check localStorage first for login state
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+      if (isLoggedIn === 'true') {
         // Only fetch students after confirming authentication
         fetchStudents();
         // Set up real-time subscription for automatic updates
@@ -31,6 +31,25 @@ export default function SubjectScreen() {
         return () => {
           supabase.removeChannel(channel);
         };
+      } else {
+        // Fallback to Supabase session if localStorage is not set
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/login');
+        } else {
+          // Only fetch students after confirming authentication
+          fetchStudents();
+          // Set up real-time subscription for automatic updates
+          const channel = supabase
+            .channel('als-updates')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'ALS' }, () => {
+              fetchStudents();
+            })
+            .subscribe();
+          return () => {
+            supabase.removeChannel(channel);
+          };
+        }
       }
     };
     checkAuth();

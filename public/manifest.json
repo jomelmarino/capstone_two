@@ -3,9 +3,13 @@
   "short_name": "Capstone",
   "description": "A student dashboard application",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
+  "lang": "en",
+  "orientation": "portrait-primary",
+  "categories": ["education", "productivity"],
   "icons": [
     {
       "src": "/icon-192.png",

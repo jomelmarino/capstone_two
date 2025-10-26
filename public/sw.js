@@ -1,13 +1,17 @@
-const CACHE_NAME = 'capstone-two-v2';
+const CACHE_NAME = 'capstone-two-v3';
 
-// ✅ Cache only essential static assets
+// ✅ Cache essential static assets and icons
 const urlsToCache = [
   '/',
   '/login',
   '/dashboard',
+  '/detail',
   '/globals.css',
   '/manifest.json',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/Logo.png'
 ];
 
 // Install event — cache static resources

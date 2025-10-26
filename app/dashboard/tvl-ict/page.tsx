@@ -14,9 +14,15 @@ export default function SubjectScreen() {
   // --- START: ESSENTIAL CODE (NO CHANGES) ---
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
+      // Check localStorage first for login state
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+      if (isLoggedIn !== 'true') {
+        // Fallback to Supabase session if localStorage is not set
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/login');
+        }
       }
     };
     checkAuth();

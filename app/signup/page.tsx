@@ -4,19 +4,23 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LockClosedIcon } from '@heroicons/react/20/solid'; // Kung gumagamit ka ng Heroicons
-import { getUserByEmail } from '../../lib/users';
+import { addUser } from '../../lib/users';
 import Swal from 'sweetalert2';
 
 // Mas simple at mas malinis na state management
 interface FormData {
+  full_name: string;
   email: string;
   password: string;
+  confirmPassword: string;
 }
 
-export default function Login() {
+export default function Signup() {
   const [formData, setFormData] = useState<FormData>({
+    full_name: '',
     email: '',
     password: '',
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -29,61 +33,71 @@ export default function Login() {
     }));
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.email || !formData.password) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Missing Fields',
-        text: 'Please enter both email and password.',
-      });
-      return;
-    }
-
-    // Get user from AppUsers table
-    const userData = await getUserByEmail(formData.email);
-    if (!userData) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: 'Invalid email or password.',
-      });
-      return;
-    }
-
-    if (userData.password !== formData.password) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Login Failed',
-        text: 'Invalid email or password.',
-      });
-      return;
-    }
-
-    if (userData.status !== 'Approved') {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Account Pending',
-        text: 'Your account is pending approval. Please wait for admin approval before logging in.',
-      });
-      return;
-    }
-
-    // Store login state in localStorage
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userEmail', formData.email);
-
-    await Swal.fire({
-      icon: 'success',
-      title: 'Login Successful!',
-      text: 'Welcome back!',
-      timer: 1500,
-      showConfirmButton: false,
-    });
-
-    router.push('/dashboard');
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmedData = {
+      full_name: formData.full_name.trim(),
+      email: formData.email.trim(),
+      password: formData.password,
+      confirmPassword: formData.confirmPassword,
+    };
+    if (!trimmedData.full_name || !trimmedData.email || !trimmedData.password || !trimmedData.confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill in all fields.',
+      });
+      return;
+    }
+    if (!isValidEmail(trimmedData.email)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address.',
+      });
+      return;
+    }
+    if (trimmedData.password !== trimmedData.confirmPassword) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Password Mismatch',
+        text: 'Passwords do not match.',
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Add user to AppUsers table with password
+      await addUser({
+        full_name: trimmedData.full_name,
+        email: trimmedData.email,
+        password: trimmedData.password,
+      });
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Sign Up Successful!',
+        text: 'Your account is pending approval. Please wait for admin approval before logging in.',
+        confirmButtonText: 'OK'
+      });
+      router.push('/login');
+    } catch (error) {
+      const errorMessage = (error as Error)?.message || 'Unknown error occurred during signup';
+      Swal.fire({
+        icon: 'error',
+        title: 'Signup Failed',
+        text: `An error occurred during signup: ${errorMessage}`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     // ✨ **Design Changes: Darker Background & Centering**
@@ -94,20 +108,41 @@ export default function Login() {
         <div>
           <Image className="mx-auto h-30 w-30" src="/Logo.png" alt="Logo" width={120} height={120} loading="eager" />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Welcome Back!
+            Create Account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to See The Student Enrolled.
+            Sign up to get started.
           </p>
         </div>
 
         {/* --- */}
 
         {/* ## Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
+        <form className="mt-8 space-y-6" onSubmit={handleSignup}>
           {/* Form Fields - Tinanggal ang -space-y-px para mas maganda ang spacing */}
           <div className="space-y-4"> {/* Increased spacing between fields */}
-            
+
+            {/* Fullname Field */}
+            <div>
+              <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="full_name"
+                  name="full_name"
+                  type="text"
+                  required
+                  autoComplete="name"
+                  // ✨ **Design Changes: More rounded, better focus ring**
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out"
+                  placeholder="Enter your full name"
+                  value={formData.full_name}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -128,7 +163,7 @@ export default function Login() {
                 />
               </div>
             </div>
-            
+
             {/* Password Field */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
@@ -140,7 +175,7 @@ export default function Login() {
                   name="password"
                   type="password"
                   required
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   // ✨ **Design Changes: More rounded, better focus ring**
                   className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out"
                   placeholder="••••••••"
@@ -149,27 +184,26 @@ export default function Login() {
                 />
               </div>
             </div>
-          </div>
-          
-          {/* --- */}
 
-          {/* ## Options (Remember Me & Forgot Password) */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 whitespace-nowrap">
-                Remember me
+            {/* Confirm Password Field */}
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Confirm Password
               </label>
-            </div>
-            <div className="text-sm">
-              <a href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot your password?
-              </a>
+              <div className="mt-1">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  autoComplete="new-password"
+                  // ✨ **Design Changes: More rounded, better focus ring**
+                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition duration-150 ease-in-out"
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
           </div>
 
@@ -179,24 +213,25 @@ export default function Login() {
           <div>
             <button
               type="submit"
+              disabled={isLoading}
               // ✨ **Design Changes: Bolder button, shadow, slightly larger padding**
-              className="group relative flex w-full justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out shadow-md hover:shadow-lg"
+              className="group relative flex w-full justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out shadow-md hover:shadow-lg disabled:opacity-50"
             >
               <LockClosedIcon className="h-5 w-5 mr-2" aria-hidden="true" /> {/* Added icon for visual appeal */}
-              Sign In
+              {isLoading ? 'Signing Up...' : 'Sign Up'}
             </button>
           </div>
 
-          {/* Sign Up Link */}
+          {/* Sign In Link */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
-              <a href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Sign up here
+              Already have an account?{' '}
+              <a href="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Sign in here
               </a>
             </p>
           </div>
-         </form>
+        </form>
 
       </div>
     </div>

@@ -11,17 +11,30 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
+      // Check localStorage first for login state
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const userEmail = localStorage.getItem('userEmail');
+
+      if (isLoggedIn === 'true' && userEmail) {
+        setUserEmail(userEmail);
       } else {
-        setUserEmail(session.user.email || '');
+        // Fallback to Supabase session if localStorage is not set
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          router.push('/login');
+        } else {
+          setUserEmail(session.user.email || '');
+        }
       }
     };
     checkAuth();
   }, [router]);
 
   const handleLogout = async () => {
+    // Clear localStorage on logout
+    localStorage.removeItem('isLoggedIn');
+    localStorage.removeItem('userEmail');
+
     const { data: { session } } = await supabase.auth.getSession();
     const isExpired = session && session.expires_at && session.expires_at < Date.now() / 1000;
     await supabase.auth.signOut({ scope: isExpired ? 'local' : 'global' });
@@ -31,7 +44,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#107DAC' }}>
       <header className="bg-white shadow-lg"> {/* Mas malaking shadow */}
-        <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 " style={{ backgroundColor: '#0B3C5D' }}>
+        <div className=" w-full mx-auto px-4 sm:px-6 lg:px-8 " style={{ backgroundColor: '#0B3C5D' }}>
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-4xl font-extrabold text-white flex items-center">Dashboard <Image src="/Logo.png" alt="Logo" width={48} height={48} className="ml-2" /></h1> {/* Mas malaking heading */}
@@ -50,7 +63,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-white">View The student List</h2>
+            <h2 className="text-2xl font-bold text-white">View Who Enrolled Students</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8"> {/* Mas malaking gap */}
             
