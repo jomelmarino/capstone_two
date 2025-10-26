@@ -166,7 +166,7 @@ export default function Login() {
                 Remember me
               </label>
             </div>
-            <div className="text-sm">
+            <div className="ml-6 text-sm">
               <a href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
                 Forgot your password?
               </a>
