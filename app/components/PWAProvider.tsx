@@ -1,10 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export default function PWAProvider() {
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -21,7 +22,7 @@ export default function PWAProvider() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-    if (isStandalone && !isLoggedIn) {
+    if (isStandalone && !isLoggedIn && pathname !== '/login' && pathname !== '/signup') {
       router.push('/login');
     }
 
@@ -37,7 +38,7 @@ export default function PWAProvider() {
     return () => {
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [router]);
+  }, [router, pathname]);
 
   return null;
 }
