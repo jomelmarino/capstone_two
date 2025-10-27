@@ -89,11 +89,19 @@ export default function Signup() {
       router.push('/login');
     } catch (error) {
       const errorMessage = (error as Error)?.message || 'Unknown error occurred during signup';
-      Swal.fire({
-        icon: 'error',
-        title: 'Signup Failed',
-        text: `An error occurred during signup: ${errorMessage}`,
-      });
+      if (errorMessage.includes('duplicate key value violates unique constraint "AppUsers_email_key"')) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Email Already Exists',
+          text: 'An account with this email address already exists. Please use a different email or try logging in.',
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Signup Failed',
+          text: `An error occurred during signup: ${errorMessage}`,
+        });
+      }
     } finally {
       setIsLoading(false);
     }

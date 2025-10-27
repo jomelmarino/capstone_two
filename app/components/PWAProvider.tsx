@@ -22,7 +22,7 @@ export default function PWAProvider() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-    if (isStandalone && !isLoggedIn && pathname !== '/login' && pathname !== '/signup') {
+    if (isStandalone && !isLoggedIn && pathname !== '/login' && pathname !== '/signup' && pathname !== '/forgot-password') {
       router.push('/login');
     }
 

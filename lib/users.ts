@@ -44,18 +44,6 @@ export const updateUserStatus = async (email: string, status: 'Pending' | 'Appro
   if (error) throw error;
 };
 
-export const getUserById = async (id: string): Promise<AppUser | null> => {
-  const { data, error } = await supabase
-    .from('AppUsers')
-    .select('full_name, email, password, status')
-    .eq('id', id)
-    .single();
-  if (error) {
-    if (error.code === 'PGRST116') return null; // No rows found
-    throw error;
-  }
-  return data;
-};
 
 export const resetPassword = async (email: string, newPassword: string): Promise<void> => {
   // Check if user exists
