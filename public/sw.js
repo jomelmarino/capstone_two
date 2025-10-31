@@ -1,4 +1,5 @@
-const CACHE_NAME = 'capstone-two-v3';
+// Cache name for the Capstone Two application
+const CACHE_NAME = 'KVSHS-v3';
 
 // ✅ Cache essential static assets and icons
 const urlsToCache = [

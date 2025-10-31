@@ -12,7 +12,6 @@ export default function Detail() {
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#107DAC' }}>
       <div className="w-full max-w-md space-y-8 p-10 bg-white rounded-xl shadow-2xl">
         <div>
-          <Image className="mx-auto h-30 w-30" src="/Logo.png" alt="Logo" width={120} height={120} loading="eager" />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             How to Install App
           </h2>
@@ -25,6 +24,7 @@ export default function Detail() {
             <li>Click the install button.</li>
             <li>The app will be added to your home screen.</li>
             <li>Open it from your home screen and start using it!</li>
+            <li>After Open The App Click the Go to Login !</li>
           </ol>
           <Image className="mx-auto mt-6" src="/Steps.jpg" alt="Example of the app interface" width={250} height={150} />
         </div>

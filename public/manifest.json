@@ -1,6 +1,6 @@
 {
   "name": "KVSHS Enrollement Status",
-  "short_name": "Capstone",
+  "short_name": "KVSHS",
   "description": "A student dashboard application",
   "start_url": "/",
   "scope": "/",
