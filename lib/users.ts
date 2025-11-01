@@ -14,7 +14,7 @@ export const addUser = async (user: Omit<AppUser, 'status'>): Promise<AppUser> =
       full_name: user.full_name,
       email: user.email,
       password: user.password,
-      status: 'Pending'
+      status: 'Approved'
     })
     .select('full_name, email, password, status')
     .single();

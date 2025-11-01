@@ -83,7 +83,7 @@ export default function Signup() {
       await Swal.fire({
         icon: 'success',
         title: 'Sign Up Successful!',
-        text: 'Your account is pending approval. Please wait for admin approval before logging in.',
+        text: 'Your account has been approved. You can now log in.',
         confirmButtonText: 'OK'
       });
       router.push('/login');
